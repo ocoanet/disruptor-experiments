@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using DisruptorExperiments.MarketData.V1;
+using DisruptorExperiments.MarketData;
 
 namespace DisruptorExperiments.Engine.X
 {
@@ -10,7 +10,8 @@ namespace DisruptorExperiments.Engine.X
         public readonly long[] HandlerEndTimestamps = new long[5];
 
         public XEventType EventType;
-        public MarketDataConflater MarketDataConflater;
+        public int MarketDataSecurityId;
+        public IMarketDataConflater MarketDataConflater;
         public long AcquireTimestamp;
 
         public void OnAcquired()
@@ -21,8 +22,16 @@ namespace DisruptorExperiments.Engine.X
         public void Reset()
         {
             EventType = XEventType.None;
+            MarketDataSecurityId = 0;
             MarketDataConflater = null;
             MarketDataUpdate.Reset();
+        }
+
+        public void SetMarketDataUpdate(int securityId, IMarketDataConflater marketDataConflater)
+        {
+            EventType = XEventType.MarketDataUpdate;
+            MarketDataSecurityId = securityId;
+            MarketDataConflater = marketDataConflater;
         }
     }
 }

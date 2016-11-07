@@ -25,15 +25,15 @@ namespace DisruptorExperiments.Engine.X
 
         private void ProcessMarketDataUpdate(XEvent data)
         {
-            data.MarketDataConflater.Detach();
+            var marketDataUpdate = data.MarketDataConflater.Detach();
 
             Thread.SpinWait(1 << 6);
 
-            if (data.MarketDataUpdate.Last == null)
+            if (marketDataUpdate.Last == null)
                 return;
 
-            var movingAverage = GetMovingAverage(data.MarketDataUpdate.SecurityId);
-            movingAverage.Add(data.MarketDataUpdate.Last.Value);
+            var movingAverage = GetMovingAverage(data.MarketDataSecurityId);
+            movingAverage.Add(marketDataUpdate.Last.Value);
         }
 
         private MovingAverage GetMovingAverage(int securityId)

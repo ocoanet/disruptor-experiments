@@ -2,14 +2,19 @@
 
 namespace DisruptorExperiments.MarketData.V1
 {
-    public class MarketDataConflater
+    /// <summary>
+    /// Locked-based.
+    /// </summary>
+    public class MarketDataConflater : IMarketDataConflater
     {
         private readonly XEngine _targetEngine;
+        private readonly int _securityId;
         private XEvent _currentEvent;
 
-        public MarketDataConflater(XEngine targetEngine)
+        public MarketDataConflater(XEngine targetEngine, int securityId)
         {
             _targetEngine = targetEngine;
+            _securityId = securityId;
         }
 
         public void AddOrMerge(MarketDataUpdate update)
@@ -21,18 +26,21 @@ namespace DisruptorExperiments.MarketData.V1
                     using (var acquire = _targetEngine.AcquireEvent())
                     {
                         _currentEvent = acquire.Event;
+                        _currentEvent.SetMarketDataUpdate(_securityId, this);
                     }
                 }
-                update.ApplyTo(_currentEvent.MarketDataUpdate);
+                update.Apply(_currentEvent.MarketDataUpdate);
             }
         }
 
-        public void Detach()
+        public MarketDataUpdate Detach()
         {
+            var currentEvent = _currentEvent;
             lock (_targetEngine)
             {
                 _currentEvent = null;
             }
+            return currentEvent.MarketDataUpdate;
         }
     }
 }
