@@ -58,8 +58,11 @@
     <Compile Include="Engine\X\XEngine.cs" />
     <Compile Include="Engine\X\XEvent.cs" />
     <Compile Include="Engine\X\XEventType.cs" />
+    <Compile Include="MarketData\IMarketDataConflater.cs" />
+    <Compile Include="MarketData\V3\MarketDataConflater.cs" />
+    <Compile Include="MarketData\V2\MarketDataConflater.cs" />
     <Compile Include="MarketData\V1\MarketDataConflater.cs" />
-    <Compile Include="MarketData\V1\MarketDataUpdate.cs" />
+    <Compile Include="MarketData\MarketDataUpdate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
