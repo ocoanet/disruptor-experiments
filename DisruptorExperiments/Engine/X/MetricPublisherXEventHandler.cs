@@ -6,16 +6,22 @@ namespace DisruptorExperiments.Engine.X
 {
     public class MetricPublisherXEventHandler : IEventHandler<XEvent>, ILifecycleAware
     {
-        private readonly LongHistogram _histogram;
+        private readonly LongHistogram _latencyHistogram;
+        private readonly IntHistogram _conflactionHistogram;
 
         public MetricPublisherXEventHandler()
         {
-            _histogram = new LongHistogram(TimeStamp.Hours(1), 3);
+            _latencyHistogram = new LongHistogram(TimeStamp.Minutes(1), 3);
+            _conflactionHistogram = new IntHistogram(1000, 1);
         }
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
-            _histogram.RecordValue(data.HandlerEndTimestamps[0] - data.AcquireTimestamp);
+            if (data.EventType != XEventType.MarketDataUpdate)
+                return;
+
+            _latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.AcquireTimestamp);
+            _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
         }
 
         public void OnStart()
@@ -24,7 +30,8 @@ namespace DisruptorExperiments.Engine.X
 
         public void OnShutdown()
         {
-            _histogram.OutputPercentileDistribution(Console.Out, outputValueUnitScalingRatio: OutputScalingFactor.TimeStampToMicroseconds, percentileTicksPerHalfDistance: 10);
+            _latencyHistogram.OutputPercentileDistribution(Console.Out, outputValueUnitScalingRatio: OutputScalingFactor.TimeStampToMicroseconds, percentileTicksPerHalfDistance: 1);
+            _conflactionHistogram.OutputPercentileDistribution(Console.Out, percentileTicksPerHalfDistance: 1);
         }
     }
 }

@@ -44,6 +44,8 @@ namespace DisruptorExperiments.Engine.X
             {
                 _ringBuffer = ringBuffer;
                 _sequence = sequence;
+
+                Event.OnAcquired();
             }
 
             public XEvent Event { get { return _ringBuffer[_sequence]; } }
