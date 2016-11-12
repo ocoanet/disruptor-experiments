@@ -54,6 +54,9 @@
     <Compile Include="Engine\X\BusinessXEventHandler.cs" />
     <Compile Include="Engine\X\CleanerXEventHandler.cs" />
     <Compile Include="Engine\X\DumperXEventHandler.cs" />
+    <Compile Include="Engine\X\Event3\XEvent.cs" />
+    <Compile Include="Engine\X\Event2\XEvent.cs" />
+    <Compile Include="Engine\X\Event1\XEvent.cs" />
     <Compile Include="Engine\X\IXEngine.cs" />
     <Compile Include="Engine\X\MetricPublisherXEventHandler.cs" />
     <Compile Include="Engine\X\StatePublisherXEventHandler.cs" />

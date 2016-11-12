@@ -4,5 +4,8 @@
     {
         None,
         MarketDataUpdate,
+        Execution,
+        TradingSignal1,
+        TradingSignal2,
     }
 }
