@@ -27,7 +27,7 @@ namespace DisruptorExperiments.Engine.X
         {
             var marketDataUpdate = data.MarketDataConflater.Detach();
 
-            Thread.SpinWait(1 << 6);
+            Thread.SpinWait(1 << 5);
 
             if (marketDataUpdate.Last == null)
                 return;

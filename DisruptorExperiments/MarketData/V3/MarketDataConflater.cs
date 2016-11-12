@@ -23,27 +23,29 @@ namespace DisruptorExperiments.MarketData.V3
             using (var acquire = _targetEngine.AcquireEvent())
             {
                 var currentEvent = acquire.Event;
+                var newUpdate = currentEvent.MarketDataUpdate;
 
-                update.Apply(currentEvent.MarketDataUpdate);
+                update.Apply(newUpdate);
 
                 var currentUpdate = Volatile.Read(ref _currentUpdate);
                 if (currentUpdate != null)
                 {
-                    currentEvent.MarketDataUpdate.Next = currentUpdate;
-                    if (Interlocked.CompareExchange(ref _currentUpdate, currentEvent.MarketDataUpdate, currentUpdate) == currentUpdate)
+                    newUpdate.Next = currentUpdate;
+                    if (Interlocked.CompareExchange(ref _currentUpdate, newUpdate, currentUpdate) == currentUpdate)
                         return;
                 }
 
-                currentEvent.MarketDataUpdate.Next = null;
+                newUpdate.Next = null;
+                Volatile.Write(ref _currentUpdate, newUpdate);
+
                 currentEvent.SetMarketDataUpdate(_securityId, this);
             }
         }
 
         public MarketDataUpdate Detach()
         {
-            var marketDataUpdate = Interlocked.Exchange(ref _currentUpdate, null);
-            marketDataUpdate.MergeLinkedList();
-            return marketDataUpdate;
+            var update = Interlocked.Exchange(ref _currentUpdate, null);
+            return update.MergeLinkedList();
         }
     }
 }

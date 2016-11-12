@@ -19,26 +19,20 @@
             if (Last != null)
                 other.Last = Last;
 
-            other.UpdateCount++;
+            other.UpdateCount += UpdateCount;
         }
 
-        public void MergeLinkedList()
+        public MarketDataUpdate MergeLinkedList()
         {
-            var next = Next;
+            var update = this;
+            var next = update.Next;
             while (next != null)
             {
-                if (Bid == null)
-                    Bid = next.Bid;
-
-                if (Ask == null)
-                    Ask = next.Ask;
-
-                if (Last != null)
-                    Last = next.Last;
-
-                UpdateCount++;
-                next = next.Next;
+                update.Apply(next);
+                update = next;
+                next = update.Next;
             }
+            return update;
         }
 
         public void Reset()

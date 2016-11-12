@@ -50,15 +50,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Engine\X\AcquireScope.cs" />
     <Compile Include="Engine\X\BusinessXEventHandler.cs" />
     <Compile Include="Engine\X\CleanerXEventHandler.cs" />
     <Compile Include="Engine\X\DumperXEventHandler.cs" />
+    <Compile Include="Engine\X\IXEngine.cs" />
     <Compile Include="Engine\X\MetricPublisherXEventHandler.cs" />
     <Compile Include="Engine\X\StatePublisherXEventHandler.cs" />
     <Compile Include="Engine\X\XEngine.cs" />
     <Compile Include="Engine\X\XEvent.cs" />
     <Compile Include="Engine\X\XEventType.cs" />
     <Compile Include="MarketData\IMarketDataConflater.cs" />
+    <Compile Include="MarketData\V4\MarketDataConflater.cs" />
     <Compile Include="MarketData\V3\MarketDataConflater.cs" />
     <Compile Include="MarketData\V2\MarketDataConflater.cs" />
     <Compile Include="MarketData\V1\MarketDataConflater.cs" />

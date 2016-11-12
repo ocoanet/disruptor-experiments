@@ -11,6 +11,7 @@ namespace DisruptorExperiments.MarketData.V2
         private readonly XEngine _targetEngine;
         private readonly int _securityId;
         private MarketDataUpdate _currentUpdate;
+        private XEvent _event;
 
         public MarketDataConflater(XEngine targetEngine, int securityId)
         {
@@ -32,18 +33,23 @@ namespace DisruptorExperiments.MarketData.V2
             }
 
             newUpdate.Next = null;
+            Volatile.Write(ref _currentUpdate, newUpdate);
+
             using (var acquire = _targetEngine.AcquireEvent())
             {
-                var currentEvent = acquire.Event;
-                currentEvent.SetMarketDataUpdate(_securityId, this);
+                _event = acquire.Event;
+                _event.SetMarketDataUpdate(_securityId, this);
             }
         }
 
         public MarketDataUpdate Detach()
         {
-            var marketDataUpdate = Interlocked.Exchange(ref _currentUpdate, null);
-            marketDataUpdate.MergeLinkedList();
-            return marketDataUpdate;
+            var evt = _event;
+            var update = Interlocked.Exchange(ref _currentUpdate, null);
+
+            var mergedUpdate = update.MergeLinkedList();
+            mergedUpdate.Apply(evt.MarketDataUpdate);
+            return evt.MarketDataUpdate;
         }
     }
 }
