@@ -7,12 +7,12 @@ namespace DisruptorExperiments.Engine.X.Events.V3
         public XEventType EventType { get; private set; }
         public EventInfo EventData;
 
-        public void SetMarketDataUpdate(int securityId, long bidPrice, long askPrice)
+        public void SetMarketData(int securityId, long bidPrice, long askPrice)
         {
-            EventType = XEventType.MarketDataUpdate;
-            EventData.MarketDataUpdate.SecurityId = securityId;
-            EventData.MarketDataUpdate.BidPrice = bidPrice;
-            EventData.MarketDataUpdate.AskPrice = askPrice;
+            EventType = XEventType.MarketData;
+            EventData.MarketData.SecurityId = securityId;
+            EventData.MarketData.BidPrice = bidPrice;
+            EventData.MarketData.AskPrice = askPrice;
         }
 
         public void SetExecution(int securityId, long price, long quantity)
@@ -30,11 +30,11 @@ namespace DisruptorExperiments.Engine.X.Events.V3
             public ExecutionInfo Execution;
 
             [FieldOffset(0)]
-            public MarketDataUpdateInfo MarketDataUpdate;
+            public MarketDataInfo MarketData;
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        public class ExecutionInfo
+        public struct ExecutionInfo
         {
             [FieldOffset(0)]
             public int SecurityId;
@@ -45,7 +45,7 @@ namespace DisruptorExperiments.Engine.X.Events.V3
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        public class MarketDataUpdateInfo
+        public struct MarketDataInfo
         {
             [FieldOffset(0)]
             public int SecurityId;

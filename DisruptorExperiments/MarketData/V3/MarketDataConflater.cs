@@ -38,7 +38,7 @@ namespace DisruptorExperiments.MarketData.V3
                 newUpdate.Next = null;
                 Volatile.Write(ref _currentUpdate, newUpdate);
 
-                currentEvent.SetMarketDataUpdate(_securityId, this);
+                currentEvent.SetMarketData(_securityId, this);
             }
         }
 

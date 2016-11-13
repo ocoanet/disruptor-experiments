@@ -54,10 +54,11 @@
     <Compile Include="Engine\X\BusinessXEventHandler.cs" />
     <Compile Include="Engine\X\CleanerXEventHandler.cs" />
     <Compile Include="Engine\X\DumperXEventHandler.cs" />
-    <Compile Include="Engine\X\Event3\XEvent.cs" />
-    <Compile Include="Engine\X\Event2\XEvent.cs" />
-    <Compile Include="Engine\X\Event1\XEvent.cs" />
-    <Compile Include="Engine\X\IXEngine.cs" />
+    <Compile Include="Engine\X\Events\V3\XEvent.cs" />
+    <Compile Include="Engine\X\Events\V2\XEvent.cs" />
+    <Compile Include="Engine\X\Events\V1\XEvent.cs" />
+    <Compile Include="Engine\X\Interfaces\V1\IXEngine.cs" />
+    <Compile Include="Engine\X\Interfaces\V2\IXEngine.cs" />
     <Compile Include="Engine\X\MetricPublisherXEventHandler.cs" />
     <Compile Include="Engine\X\StatePublisherXEventHandler.cs" />
     <Compile Include="Engine\X\XEngine.cs" />

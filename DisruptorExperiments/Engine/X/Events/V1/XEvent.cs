@@ -10,9 +10,9 @@
         public long ExecutionPrice;
         public long ExecutionQuantity;
 
-        public void SetMarketDataUpdate(int securityId, long bidPrice, long askPrice)
+        public void SetMarketData(int securityId, long bidPrice, long askPrice)
         {
-            EventType = XEventType.MarketDataUpdate;
+            EventType = XEventType.MarketData;
             MarketDataSecurityId = securityId;
             MarketDataBidPrice = bidPrice;
             MarketDataAskPrice = askPrice;

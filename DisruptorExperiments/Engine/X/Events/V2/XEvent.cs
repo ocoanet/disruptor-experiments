@@ -5,10 +5,10 @@
         public XEventType EventType { get; private set; }
         public object EventData { get; private set; }
 
-        public void SetMarketDataUpdate(MarketDataUpdateInfo marketDataUpdate)
+        public void SetMarketData(MarketDataInfo marketData)
         {
-            EventType = XEventType.MarketDataUpdate;
-            EventData = marketDataUpdate;
+            EventType = XEventType.MarketData;
+            EventData = marketData;
         }
 
         public void SetExecution(ExecutionInfo execution)
@@ -24,7 +24,7 @@
             public long Quantity;
         }
 
-        public class MarketDataUpdateInfo
+        public class MarketDataInfo
         {
             public int SecurityId;
             public long BidPrice;

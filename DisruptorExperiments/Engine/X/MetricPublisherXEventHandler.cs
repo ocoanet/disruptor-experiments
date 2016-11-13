@@ -18,10 +18,10 @@ namespace DisruptorExperiments.Engine.X
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
-            if (data.EventType != XEventType.MarketDataUpdate)
+            if (data.EventType != XEventType.MarketData)
                 return;
 
-            _latencyHistogram.RecordValue(data.HandlerBeginTimestamps[0] - data.AcquireTimestamp);
+            _latencyHistogram.RecordValue(data.HandlerMetrics[0].BeginTimestamp - data.AcquireTimestamp);
             //_latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.HandlerBeginTimestamps[0]);
             _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
             _updateCount += data.MarketDataUpdate.UpdateCount;

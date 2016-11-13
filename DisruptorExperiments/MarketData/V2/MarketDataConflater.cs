@@ -38,7 +38,7 @@ namespace DisruptorExperiments.MarketData.V2
             using (var acquire = _targetEngine.AcquireEvent())
             {
                 _event = acquire.Event;
-                _event.SetMarketDataUpdate(_securityId, this);
+                _event.SetMarketData(_securityId, this);
             }
         }
 

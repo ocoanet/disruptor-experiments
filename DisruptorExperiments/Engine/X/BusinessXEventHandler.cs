@@ -13,26 +13,26 @@ namespace DisruptorExperiments.Engine.X
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
-            data.HandlerBeginTimestamps[0] = Stopwatch.GetTimestamp();
+            data.HandlerMetrics[0].BeginTimestamp = Stopwatch.GetTimestamp();
 
-            if (data.EventType == XEventType.MarketDataUpdate)
+            if (data.EventType == XEventType.MarketData)
             {
-                ProcessMarketDataUpdate(data);
+                ProcessMarketDataUpdate(ref data.EventData.MarketData);
             }
 
-            data.HandlerEndTimestamps[0] = Stopwatch.GetTimestamp();
+            data.HandlerMetrics[0].EndTimestamp = Stopwatch.GetTimestamp();
         }
 
-        private void ProcessMarketDataUpdate(XEvent data)
+        private void ProcessMarketDataUpdate(ref XEvent.MarketDataInfo marketData)
         {
-            var marketDataUpdate = data.MarketDataConflater.Detach();
+            var marketDataUpdate = marketData.Conflater.Detach();
 
             Thread.SpinWait(1 << 5);
 
             if (marketDataUpdate.Last == null)
                 return;
 
-            var movingAverage = GetMovingAverage(data.MarketDataSecurityId);
+            var movingAverage = GetMovingAverage(marketData.SecurityId);
             movingAverage.Add(marketDataUpdate.Last.Value);
         }
 

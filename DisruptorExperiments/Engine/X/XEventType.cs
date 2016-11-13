@@ -3,7 +3,7 @@
     public enum XEventType
     {
         None,
-        MarketDataUpdate,
+        MarketData,
         Execution,
         TradingSignal1,
         TradingSignal2,

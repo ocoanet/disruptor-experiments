@@ -10,26 +10,46 @@ namespace DisruptorExperiments
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var engine = new XEngine();
             engine.Start();
 
-            var publisher = new MarketDataPublisher(engine, securityCount: 50);
+            //var publisher = new MarketDataPublisher(engine, securityCount: 50);
+            //publisher.Run(TimeSpan.FromSeconds(10));
+            //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
-            var collectionCountBefore = GC.CollectionCount(0);
-
-            publisher.Run(TimeSpan.FromSeconds(10));
-
-            var collectionCount = GC.CollectionCount(0) - collectionCountBefore;
-            Console.WriteLine($"CollectionCount: {collectionCount}");
+            var stopwatch = Stopwatch.StartNew();
+            PublishTradingSignalV1(engine);
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.Elapsed);
 
             engine.Stop();
 
-            Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
             Console.WriteLine("...");
             Console.ReadKey();
+        }
+
+        private static void PublishTradingSignalV1(Engine.X.Interfaces.V1.IXEngine engine)
+        {
+            for (int i = 0; i < 500000; i++)
+            {
+                engine.EnqueueTradingSignal1(i, 1000, 500, 1, 42);
+                Thread.SpinWait(1 << 4);
+            }
+        }
+
+        private static void PublishTradingSignalV2(Engine.X.Interfaces.V2.IXEngine engine)
+        {
+            for (int i = 0; i < 500000; i++)
+            {
+                using (var acquiredEvent = engine.AcquireEvent())
+                {
+                    acquiredEvent.Event.SetTradingSignal1(i, 1000, 500, 1, 42);
+                }
+                Thread.SpinWait(1 << 4);
+            }
         }
 
         private class MarketDataPublisher
@@ -50,6 +70,8 @@ namespace DisruptorExperiments
 
             public void Run(TimeSpan duration)
             {
+                var collectionCountBefore = GC.CollectionCount(0);
+
                 _stopwatch.Restart();
                 while (_stopwatch.Elapsed < duration)
                 {
@@ -62,6 +84,9 @@ namespace DisruptorExperiments
                     UpdateCount++;
                     Thread.SpinWait(1 + _random.Next(1 << 5));
                 }
+
+                var collectionCount = GC.CollectionCount(0) - collectionCountBefore;
+                Console.WriteLine($"CollectionCount: {collectionCount}");
             }
         }
     }
