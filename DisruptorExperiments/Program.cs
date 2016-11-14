@@ -33,7 +33,7 @@ namespace DisruptorExperiments
 
         private static void PublishTradingSignalV1(Engine.X.Interfaces.V1.IXEngine engine)
         {
-            for (int i = 0; i < 500000; i++)
+            for (int i = 0; i < 5000000; i++)
             {
                 engine.EnqueueTradingSignal1(i, 1000, 500, 1, 42);
                 Thread.SpinWait(1 << 4);
@@ -42,7 +42,7 @@ namespace DisruptorExperiments
 
         private static void PublishTradingSignalV2(Engine.X.Interfaces.V2.IXEngine engine)
         {
-            for (int i = 0; i < 500000; i++)
+            for (int i = 0; i < 5000000; i++)
             {
                 using (var acquiredEvent = engine.AcquireEvent())
                 {
