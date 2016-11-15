@@ -59,6 +59,8 @@
     <Compile Include="Engine\X\Events\V1\XEvent.cs" />
     <Compile Include="Engine\X\Interfaces\V1\IXEngine.cs" />
     <Compile Include="Engine\X\Interfaces\V2\IXEngine.cs" />
+    <Compile Include="Engine\X\Interfaces\V2\AcquireScope.cs" />
+    <Compile Include="Engine\X\Interfaces\V3\IXEngine.cs" />
     <Compile Include="Engine\X\MetricPublisherXEventHandler.cs" />
     <Compile Include="Engine\X\StatePublisherXEventHandler.cs" />
     <Compile Include="Engine\X\XEngine.cs" />
@@ -72,6 +74,7 @@
     <Compile Include="MarketData\MarketDataUpdate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testing\TestXEngine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -35,7 +35,7 @@ namespace DisruptorExperiments.MarketData.V2
             newUpdate.Next = null;
             Volatile.Write(ref _currentUpdate, newUpdate);
 
-            using (var acquire = _targetEngine.AcquireEvent())
+            using (var acquire = _targetEngine.AcquireEventRef())
             {
                 _event = acquire.Event;
                 _event.SetMarketData(_securityId, this);

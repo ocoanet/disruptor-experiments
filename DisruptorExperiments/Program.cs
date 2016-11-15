@@ -19,13 +19,30 @@ namespace DisruptorExperiments
             //publisher.Run(TimeSpan.FromSeconds(10));
             //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
-            var stopwatch = Stopwatch.StartNew();
-            PublishTradingSignalV1(engine);
-            stopwatch.Stop();
-            Console.WriteLine(stopwatch.Elapsed);
+            var stopwatch = new Stopwatch();
+
+            for (int i = 0; i < 2; i++)
+            {
+                stopwatch.Restart();
+                PublishTradingSignalV1(engine);
+                stopwatch.Stop();
+                Console.WriteLine($"V1: {stopwatch.Elapsed}");
+                Thread.Sleep(200);
+
+                stopwatch.Restart();
+                PublishTradingSignalV2(engine);
+                stopwatch.Stop();
+                Console.WriteLine($"V2: {stopwatch.Elapsed}");
+                Thread.Sleep(200);
+
+                stopwatch.Restart();
+                PublishTradingSignalV3(engine);
+                stopwatch.Stop();
+                Console.WriteLine($"V3: {stopwatch.Elapsed}");
+                Thread.Sleep(200);
+            }
 
             engine.Stop();
-
 
             Console.WriteLine("...");
             Console.ReadKey();
@@ -45,6 +62,18 @@ namespace DisruptorExperiments
             for (int i = 0; i < 5000000; i++)
             {
                 using (var acquiredEvent = engine.AcquireEvent())
+                {
+                    acquiredEvent.Event.SetTradingSignal1(i, 1000, 500, 1, 42);
+                }
+                Thread.SpinWait(1 << 4);
+            }
+        }
+
+        private static void PublishTradingSignalV3(Engine.X.Interfaces.V3.IXEngine engine)
+        {
+            for (int i = 0; i < 5000000; i++)
+            {
+                using (var acquiredEvent = engine.AcquireEventRef())
                 {
                     acquiredEvent.Event.SetTradingSignal1(i, 1000, 500, 1, 42);
                 }

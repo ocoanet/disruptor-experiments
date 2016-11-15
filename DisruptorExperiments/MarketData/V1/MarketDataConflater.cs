@@ -23,7 +23,7 @@ namespace DisruptorExperiments.MarketData.V1
             {
                 if (_currentEvent == null)
                 {
-                    using (var acquire = _targetEngine.AcquireEvent())
+                    using (var acquire = _targetEngine.AcquireEventRef())
                     {
                         _currentEvent = acquire.Event;
                         _currentEvent.SetMarketData(_securityId, this);
