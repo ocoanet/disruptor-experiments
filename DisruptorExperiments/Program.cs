@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -15,32 +16,15 @@ namespace DisruptorExperiments
             var engine = new XEngine();
             engine.Start();
 
-            //var publisher = new MarketDataPublisher(engine, securityCount: 50);
+            //var publisher = new MarketDataPublisher1(engine, securityCount: 50);
             //publisher.Run(TimeSpan.FromSeconds(10));
             //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
-            var stopwatch = new Stopwatch();
+            //var publisher = new MarketDataPublisher2(engine, securityCount: 50);
+            //publisher.Run(TimeSpan.FromSeconds(10));
+            //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
-            for (int i = 0; i < 2; i++)
-            {
-                stopwatch.Restart();
-                PublishTradingSignalV1(engine);
-                stopwatch.Stop();
-                Console.WriteLine($"V1: {stopwatch.Elapsed}");
-                Thread.Sleep(200);
-
-                stopwatch.Restart();
-                PublishTradingSignalV2(engine);
-                stopwatch.Stop();
-                Console.WriteLine($"V2: {stopwatch.Elapsed}");
-                Thread.Sleep(200);
-
-                stopwatch.Restart();
-                PublishTradingSignalV3(engine);
-                stopwatch.Stop();
-                Console.WriteLine($"V3: {stopwatch.Elapsed}");
-                Thread.Sleep(200);
-            }
+            MeasureEnqueue(engine);
 
             engine.Stop();
 
@@ -48,9 +32,32 @@ namespace DisruptorExperiments
             Console.ReadKey();
         }
 
+        private static void MeasureEnqueue(XEngine engine)
+        {
+            var stopwatch = new Stopwatch();
+
+            for (int i = 0; i < 2; i++)
+            {
+                stopwatch.Restart();
+                PublishTradingSignalV1(engine);
+                stopwatch.Stop();
+                var v1 = stopwatch.Elapsed;
+                Console.WriteLine($"V1: {v1}");
+                Thread.Sleep(200);
+
+                stopwatch.Restart();
+                PublishTradingSignalV2(engine);
+                stopwatch.Stop();
+                var v2 = stopwatch.Elapsed;
+                Console.WriteLine($"V2: {v2}");
+                Console.WriteLine($"Delta: {(v2.Ticks - v1.Ticks) / (double)v1.Ticks:P2}");
+                Thread.Sleep(200);
+            }
+        }
+
         private static void PublishTradingSignalV1(Engine.X.Interfaces.V1.IXEngine engine)
         {
-            for (int i = 0; i < 5000000; i++)
+            for (int i = 0; i < 15000000; i++)
             {
                 engine.EnqueueTradingSignal1(i, 1000, 500, 1, 42);
                 Thread.SpinWait(1 << 4);
@@ -59,7 +66,7 @@ namespace DisruptorExperiments
 
         private static void PublishTradingSignalV2(Engine.X.Interfaces.V2.IXEngine engine)
         {
-            for (int i = 0; i < 5000000; i++)
+            for (int i = 0; i < 15000000; i++)
             {
                 using (var acquiredEvent = engine.AcquireEvent())
                 {
@@ -69,30 +76,18 @@ namespace DisruptorExperiments
             }
         }
 
-        private static void PublishTradingSignalV3(Engine.X.Interfaces.V3.IXEngine engine)
-        {
-            for (int i = 0; i < 5000000; i++)
-            {
-                using (var acquiredEvent = engine.AcquireEventRef())
-                {
-                    acquiredEvent.Event.SetTradingSignal1(i, 1000, 500, 1, 42);
-                }
-                Thread.SpinWait(1 << 4);
-            }
-        }
-
-        private class MarketDataPublisher
+        private class MarketDataPublisher1
         {
             private readonly Random _random = new Random();
             private readonly Stopwatch _stopwatch = new Stopwatch();
             private readonly MarketDataUpdate _marketDataUpdate = new MarketDataUpdate { UpdateCount = 1 };
+            private readonly Dictionary<int, MarketDataConflater> _conflacters;
             private readonly long[] _prices;
-            private readonly MarketDataConflater[] _conflacters;
 
-            public MarketDataPublisher(XEngine targetEngine, int securityCount)
+            public MarketDataPublisher1(XEngine targetEngine, int securityCount)
             {
+                _conflacters = Enumerable.Range(0, securityCount).ToDictionary(x => x, x => new MarketDataConflater(targetEngine, x));
                 _prices = Enumerable.Repeat(500L, securityCount).ToArray();
-                _conflacters = Enumerable.Range(0, securityCount).Select(x => new MarketDataConflater(targetEngine, x)).ToArray();
             }
 
             public int UpdateCount { get; private set; }
@@ -109,6 +104,49 @@ namespace DisruptorExperiments
 
                     _marketDataUpdate.Last = _prices[securityId];
                     _conflacters[securityId].AddOrMerge(_marketDataUpdate);
+
+                    UpdateCount++;
+                    Thread.SpinWait(1 + _random.Next(1 << 5));
+                }
+
+                var collectionCount = GC.CollectionCount(0) - collectionCountBefore;
+                Console.WriteLine($"CollectionCount: {collectionCount}");
+            }
+        }
+
+        private class MarketDataPublisher2
+        {
+            private readonly Random _random = new Random();
+            private readonly Stopwatch _stopwatch = new Stopwatch();
+            private readonly MarketDataUpdate _marketDataUpdate = new MarketDataUpdate { UpdateCount = 1 };
+            private readonly XEngine _targetEngine;
+            private readonly long[] _prices;
+
+            public MarketDataPublisher2(XEngine targetEngine, int securityCount)
+            {
+                _targetEngine = targetEngine;
+                _prices = Enumerable.Repeat(500L, securityCount).ToArray();
+            }
+
+            public int UpdateCount { get; private set; }
+
+            public void Run(TimeSpan duration)
+            {
+                var collectionCountBefore = GC.CollectionCount(0);
+
+                _stopwatch.Restart();
+                while (_stopwatch.Elapsed < duration)
+                {
+                    var securityId = _random.Next(_prices.Length);
+                    _prices[securityId] += 5 - _random.Next(10);
+
+                    _marketDataUpdate.Last = _prices[securityId];
+
+                    using (var acquire = _targetEngine.AcquireEvent())
+                    {
+                        _marketDataUpdate.Apply(acquire.Event.MarketDataUpdate);
+                        acquire.Event.SetMarketData(securityId, null);
+                    }
 
                     UpdateCount++;
                     Thread.SpinWait(1 + _random.Next(1 << 5));

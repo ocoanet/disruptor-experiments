@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Disruptor;
 using DisruptorExperiments.MarketData;
 
 namespace DisruptorExperiments.Engine.X
@@ -9,11 +8,9 @@ namespace DisruptorExperiments.Engine.X
     {
         public XEvent(int eventHandlerCount)
         {
-            AcquireScope = new AcquireScope<XEvent>(this);
             HandlerMetrics = new HandlerMetricInfo[eventHandlerCount];
         }
 
-        public readonly AcquireScope<XEvent> AcquireScope;
         public readonly MarketDataUpdate MarketDataUpdate = new MarketDataUpdate();
         public readonly HandlerMetricInfo[] HandlerMetrics;
         public long AcquireTimestamp;

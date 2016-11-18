@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Disruptor;
 using Disruptor.Dsl;
 
 namespace DisruptorExperiments.Engine.X
 {
-    public class XEngine : Interfaces.V1.IXEngine, Interfaces.V2.IXEngine, Interfaces.V3.IXEngine
+    public class XEngine : Interfaces.V1.IXEngine, Interfaces.V2.IXEngine
     {
         private readonly Disruptor<XEvent> _disrutpor;
         private readonly RingBuffer<XEvent> _ringBuffer;
@@ -29,17 +28,9 @@ namespace DisruptorExperiments.Engine.X
         public Interfaces.V2.AcquireScope<XEvent> AcquireEvent()
         {
             var sequence = _ringBuffer.Next();
-            _ringBuffer[sequence].OnAcquired();
-            return new Interfaces.V2.AcquireScope<XEvent>(_ringBuffer, sequence);
-        }
-
-        public AcquireScope<XEvent> AcquireEventRef()
-        {
-            var sequence = _ringBuffer.Next();
             var data = _ringBuffer[sequence];
             data.OnAcquired();
-            data.AcquireScope.OnAcquired(_ringBuffer, sequence);
-            return data.AcquireScope;
+            return new Interfaces.V2.AcquireScope<XEvent>(_ringBuffer, sequence, data);
         }
 
         public void Start()

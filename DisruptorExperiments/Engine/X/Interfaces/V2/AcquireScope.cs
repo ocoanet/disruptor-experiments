@@ -8,13 +8,15 @@ namespace DisruptorExperiments.Engine.X.Interfaces.V2
         private RingBuffer<TEvent> _ringBuffer;
         private long _sequence;
 
-        public AcquireScope(RingBuffer<TEvent> ringBuffer, long sequence)
+        public AcquireScope(RingBuffer<TEvent> ringBuffer, long sequence, TEvent data)
         {
             _ringBuffer = ringBuffer;
             _sequence = sequence;
+
+            Event = data;
         }
 
-        public TEvent Event => _ringBuffer[_sequence];
+        public TEvent Event;
 
         public void Dispose() => _ringBuffer.Publish(_sequence);
     }

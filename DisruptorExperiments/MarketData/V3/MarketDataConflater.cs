@@ -20,7 +20,7 @@ namespace DisruptorExperiments.MarketData.V3
 
         public void AddOrMerge(MarketDataUpdate update)
         {
-            using (var acquire = _targetEngine.AcquireEventRef())
+            using (var acquire = _targetEngine.AcquireEvent())
             {
                 var currentEvent = acquire.Event;
                 var newUpdate = currentEvent.MarketDataUpdate;
