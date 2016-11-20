@@ -5,7 +5,7 @@ using System.Threading;
 using Disruptor;
 using DisruptorExperiments.Engine.X.Interfaces.V2;
 
-namespace DisruptorExperiments.Testing
+namespace DisruptorExperiments.Tests.Engine
 {
     public class TestEngine<TEvent> where TEvent : class
     {

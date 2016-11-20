@@ -1,6 +1,6 @@
 ﻿using DisruptorExperiments.Engine.X;
 
-namespace DisruptorExperiments.Testing
+namespace DisruptorExperiments.Tests.Engine.X
 {
     public class TestXEngine : TestEngine<XEvent>
     {
