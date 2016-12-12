@@ -1,6 +1,6 @@
 ﻿using Disruptor;
 
-namespace DisruptorExperiments.Engine.X
+namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
 {
     public class CleanerXEventHandler : IEventHandler<XEvent>
     {

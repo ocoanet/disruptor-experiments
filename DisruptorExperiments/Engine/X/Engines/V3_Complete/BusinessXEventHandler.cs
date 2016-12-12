@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Disruptor;
 
-namespace DisruptorExperiments.Engine.X
+namespace DisruptorExperiments.Engine.X.Engines.V3_Complete
 {
     public class BusinessXEventHandler : IEventHandler<XEvent>
     {

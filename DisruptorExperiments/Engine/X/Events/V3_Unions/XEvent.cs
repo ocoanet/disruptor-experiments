@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DisruptorExperiments.Engine.X.Events.V3
+namespace DisruptorExperiments.Engine.X.Events.V3_Unions
 {
     public class XEvent
     {

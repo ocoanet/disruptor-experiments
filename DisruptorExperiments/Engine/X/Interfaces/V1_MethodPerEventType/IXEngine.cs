@@ -1,4 +1,4 @@
-﻿namespace DisruptorExperiments.Engine.X.Interfaces.V1
+﻿namespace DisruptorExperiments.Engine.X.Interfaces.V1_MethodPerEventType
 {
     public interface IXEngine
     {

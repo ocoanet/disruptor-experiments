@@ -1,4 +1,4 @@
-﻿namespace DisruptorExperiments.Engine.X.Events.V2
+﻿namespace DisruptorExperiments.Engine.X.Events.V2_PooledObjects
 {
     public class XEvent
     {

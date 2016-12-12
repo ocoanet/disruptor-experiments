@@ -2,7 +2,7 @@
 using Disruptor;
 using HdrHistogram;
 
-namespace DisruptorExperiments.Engine.X
+namespace DisruptorExperiments.Engine.X.Engines.V3_Complete
 {
     public class MetricPublisherXEventHandler : IEventHandler<XEvent>, ILifecycleAware
     {
@@ -21,7 +21,7 @@ namespace DisruptorExperiments.Engine.X
             if (data.EventType != XEventType.MarketData)
                 return;
 
-            _latencyHistogram.RecordValue(data.HandlerMetrics[0].BeginTimestamp - data.AcquireTimestamp);
+            //_latencyHistogram.RecordValue(data.HandlerMetrics[0].BeginTimestamp - data.AcquireTimestamp);
             //_latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.HandlerBeginTimestamps[0]);
             _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
             _updateCount += data.MarketDataUpdate.UpdateCount;
@@ -33,7 +33,7 @@ namespace DisruptorExperiments.Engine.X
 
         public void OnShutdown()
         {
-            _latencyHistogram.OutputPercentileDistribution(Console.Out, outputValueUnitScalingRatio: OutputScalingFactor.TimeStampToMicroseconds, percentileTicksPerHalfDistance: 1);
+            //_latencyHistogram.OutputPercentileDistribution(Console.Out, outputValueUnitScalingRatio: OutputScalingFactor.TimeStampToMicroseconds, percentileTicksPerHalfDistance: 1);
             _conflactionHistogram.OutputPercentileDistribution(Console.Out, percentileTicksPerHalfDistance: 1);
             Console.WriteLine($"Reveiced UpdateCount: {_updateCount}");
         }

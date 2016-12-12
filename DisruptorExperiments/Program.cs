@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using DisruptorExperiments.Engine.X;
+using DisruptorExperiments.Engine.X.Engines.V3_Complete;
+using DisruptorExperiments.Engine.X.Interfaces.V1_MethodPerEventType;
 using DisruptorExperiments.MarketData;
-using DisruptorExperiments.MarketData.V2;
 
 namespace DisruptorExperiments
 {
@@ -20,11 +21,11 @@ namespace DisruptorExperiments
             //publisher.Run(TimeSpan.FromSeconds(10));
             //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
-            //var publisher = new MarketDataPublisher2(engine, securityCount: 50);
-            //publisher.Run(TimeSpan.FromSeconds(10));
-            //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
+            var publisher = new MarketDataPublisher2(engine, securityCount: 50);
+            publisher.Run(TimeSpan.FromSeconds(10));
+            Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
-            MeasureEnqueue(engine);
+            //MeasureEnqueue(engine);
 
             engine.Stop();
 
@@ -55,7 +56,7 @@ namespace DisruptorExperiments
             }
         }
 
-        private static void PublishTradingSignalV1(Engine.X.Interfaces.V1.IXEngine engine)
+        private static void PublishTradingSignalV1(IXEngine engine)
         {
             for (int i = 0; i < 15000000; i++)
             {
@@ -64,7 +65,7 @@ namespace DisruptorExperiments
             }
         }
 
-        private static void PublishTradingSignalV2(Engine.X.Interfaces.V2.IXEngine engine)
+        private static void PublishTradingSignalV2(Engine.X.Interfaces.V2_ExposeEvent.IXEngine engine)
         {
             for (int i = 0; i < 15000000; i++)
             {
@@ -144,8 +145,7 @@ namespace DisruptorExperiments
 
                     using (var acquire = _targetEngine.AcquireEvent())
                     {
-                        _marketDataUpdate.Apply(acquire.Event.MarketDataUpdate);
-                        acquire.Event.SetMarketData(securityId, null);
+                        acquire.Event.SetMarketDataForBatching(securityId, _marketDataUpdate);
                     }
 
                     UpdateCount++;

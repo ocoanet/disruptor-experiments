@@ -1,7 +1,7 @@
 ﻿using System;
 using Disruptor;
 
-namespace DisruptorExperiments.Engine.X.Interfaces.V2
+namespace DisruptorExperiments.Engine.X
 {
     public struct AcquireScope<TEvent> : IDisposable where TEvent : class
     {

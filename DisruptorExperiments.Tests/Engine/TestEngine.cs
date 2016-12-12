@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Disruptor;
-using DisruptorExperiments.Engine.X.Interfaces.V2;
+using DisruptorExperiments.Engine.X;
 
 namespace DisruptorExperiments.Tests.Engine
 {

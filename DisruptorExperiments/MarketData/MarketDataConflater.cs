@@ -1,12 +1,14 @@
-﻿using DisruptorExperiments.Engine.X;
+﻿using System.Threading;
+using DisruptorExperiments.Engine.X.Engines.V3_Complete;
 
-namespace DisruptorExperiments.MarketData.V1
+namespace DisruptorExperiments.MarketData
 {
     /// <summary>
     /// Locked-based.
     /// </summary>
     public class MarketDataConflater : IMarketDataConflater
     {
+        private SpinLock _spinLock = new SpinLock();
         private readonly XEngine _targetEngine;
         private readonly int _securityId;
         private XEvent _currentEvent;
@@ -19,8 +21,11 @@ namespace DisruptorExperiments.MarketData.V1
 
         public void AddOrMerge(MarketDataUpdate update)
         {
-            lock (_targetEngine)
+            var lockTaken = false;
+            try
             {
+                _spinLock.Enter(ref lockTaken);
+
                 if (_currentEvent == null)
                 {
                     using (var acquire = _targetEngine.AcquireEvent())
@@ -29,16 +34,29 @@ namespace DisruptorExperiments.MarketData.V1
                         _currentEvent.SetMarketData(_securityId, this);
                     }
                 }
-                update.Apply(_currentEvent.MarketDataUpdate);
+                update.ApplyTo(_currentEvent.MarketDataUpdate);
+            }
+            finally
+            {
+                if (lockTaken)
+                    _spinLock.Exit();
             }
         }
 
         public MarketDataUpdate Detach()
         {
             var currentEvent = _currentEvent;
-            lock (_targetEngine)
+            var lockTaken = false;
+            try
             {
+                _spinLock.Enter(ref lockTaken);
+
                 _currentEvent = null;
+            }
+            finally
+            {
+                if (lockTaken)
+                    _spinLock.Exit();
             }
             return currentEvent.MarketDataUpdate;
         }

@@ -1,4 +1,5 @@
 ﻿using DisruptorExperiments.Engine.X;
+using DisruptorExperiments.Engine.X.Engines.V3_Complete;
 
 namespace DisruptorExperiments.Tests.Engine.X
 {

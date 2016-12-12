@@ -1,4 +1,4 @@
-﻿namespace DisruptorExperiments.Engine.X.Events.V1
+﻿namespace DisruptorExperiments.Engine.X.Events.V1_PropertyMess
 {
     public class XEvent
     {

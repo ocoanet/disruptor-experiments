@@ -5,13 +5,14 @@ using System.Threading;
 using Disruptor;
 using DisruptorExperiments.MarketData;
 
-namespace DisruptorExperiments.Engine.X
+namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 {
     public class BatchingBusinessXEventHandler : IEventHandler<XEvent>
     {
         private readonly Stack<Security> _securityPool = new Stack<Security>(Enumerable.Range(0, 100).Select(x => new Security()));
         private readonly Dictionary<int, Security> _securities = new Dictionary<int, Security>(100);
         private readonly Dictionary<int, Security> _updatedSecurities = new Dictionary<int, Security>(100);
+        private long _marketDataEntryCount = 0;
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
@@ -19,22 +20,25 @@ namespace DisruptorExperiments.Engine.X
 
             if (data.EventType == XEventType.MarketData)
             {
-                ConflateMarketDataUpdate(ref data.EventData.MarketData, data.MarketDataUpdate);
+                AddToUpdatedSecurities(ref data.EventData.MarketData, data.MarketDataUpdate);
             }
 
-            if (data.EventType != XEventType.MarketData && _updatedSecurities.Count != 0 || endOfBatch)
+            if (_updatedSecurities.Count != 0 && (data.EventType != XEventType.MarketData || endOfBatch))
             {
-                ProcessMarketDataUpdates();
+                ProcessUpdatedSecurities();
+                data.ProcessedMarketDataCount = _marketDataEntryCount;
+                _marketDataEntryCount = 0;
             }
 
             data.HandlerMetrics[0].EndTimestamp = Stopwatch.GetTimestamp();
         }
 
-        private void ConflateMarketDataUpdate(ref XEvent.MarketDataInfo marketData, MarketDataUpdate update)
+        private void AddToUpdatedSecurities(ref XEvent.MarketDataInfo marketData, MarketDataUpdate update)
         {
             var security = GetSecurity(marketData.SecurityId);
-            update.Apply(security.MarketData);
+            update.ApplyTo(security.MarketData);
             _updatedSecurities[marketData.SecurityId] = security;
+            _marketDataEntryCount++;
         }
 
         private Security GetSecurity(int securityId)
@@ -51,7 +55,7 @@ namespace DisruptorExperiments.Engine.X
             return security;
         }
 
-        private void ProcessMarketDataUpdates()
+        private void ProcessUpdatedSecurities()
         {
             foreach (var security in _updatedSecurities.Values)
             {

@@ -2,10 +2,11 @@
 using System.Threading.Tasks;
 using Disruptor;
 using Disruptor.Dsl;
+using DisruptorExperiments.Engine.X.Interfaces.V1_MethodPerEventType;
 
-namespace DisruptorExperiments.Engine.X
+namespace DisruptorExperiments.Engine.X.Engines.V3_Complete
 {
-    public class XEngine : Interfaces.V1.IXEngine, Interfaces.V2.IXEngine
+    public class XEngine : IXEngine, Interfaces.V2_ExposeEvent.IXEngine
     {
         private readonly Disruptor<XEvent> _disrutpor;
         private readonly RingBuffer<XEvent> _ringBuffer;
@@ -13,24 +14,24 @@ namespace DisruptorExperiments.Engine.X
         public XEngine()
         {
             _disrutpor = new Disruptor<XEvent>(() => new XEvent(1), 32768, TaskScheduler.Default);
-            //_disrutpor.HandleEventsWith(new BusinessXEventHandler())
+            _disrutpor.HandleEventsWith(new BusinessXEventHandler())
             //    .Then(new StatePublisherXEventHandler())
             //    .Then(new DumperXEventHandler())
-            //    .Then(new MetricPublisherXEventHandler())
-            //    .Then(new CleanerXEventHandler())
-            //    ;
+                .Then(new MetricPublisherXEventHandler())
+                .Then(new CleanerXEventHandler())
+                ;
 
-            _disrutpor.HandleEventsWith(new CleanerXEventHandler());
+            //_disrutpor.HandleEventsWith(new CleanerXEventHandler());
 
             _ringBuffer = _disrutpor.RingBuffer;
         }
 
-        public Interfaces.V2.AcquireScope<XEvent> AcquireEvent()
+        public AcquireScope<XEvent> AcquireEvent()
         {
             var sequence = _ringBuffer.Next();
             var data = _ringBuffer[sequence];
             data.OnAcquired();
-            return new Interfaces.V2.AcquireScope<XEvent>(_ringBuffer, sequence, data);
+            return new AcquireScope<XEvent>(_ringBuffer, sequence, data);
         }
 
         public void Start()

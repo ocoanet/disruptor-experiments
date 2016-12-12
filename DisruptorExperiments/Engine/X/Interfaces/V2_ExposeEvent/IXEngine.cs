@@ -1,4 +1,6 @@
-﻿namespace DisruptorExperiments.Engine.X.Interfaces.V2
+﻿using DisruptorExperiments.Engine.X.Engines.V3_Complete;
+
+namespace DisruptorExperiments.Engine.X.Interfaces.V2_ExposeEvent
 {
     public interface IXEngine
     {

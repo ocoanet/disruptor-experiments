@@ -8,7 +8,7 @@
         public int UpdateCount;
         public volatile MarketDataUpdate Next;
 
-        public void Apply(MarketDataUpdate other)
+        public void ApplyTo(MarketDataUpdate other)
         {
             if (Bid != null)
                 other.Bid = Bid;
@@ -28,7 +28,7 @@
             var next = update.Next;
             while (next != null)
             {
-                update.Apply(next);
+                update.ApplyTo(next);
                 update = next;
                 next = update.Next;
             }
