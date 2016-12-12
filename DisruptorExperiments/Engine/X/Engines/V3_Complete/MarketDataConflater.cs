@@ -1,12 +1,12 @@
 ﻿using System.Threading;
-using DisruptorExperiments.Engine.X.Engines.V3_Complete;
+using DisruptorExperiments.MarketData;
 
-namespace DisruptorExperiments.MarketData
+namespace DisruptorExperiments.Engine.X.Engines.V3_Complete
 {
     /// <summary>
     /// Locked-based.
     /// </summary>
-    public class MarketDataConflater : IMarketDataConflater
+    public class MarketDataConflater
     {
         private SpinLock _spinLock = new SpinLock();
         private readonly XEngine _targetEngine;

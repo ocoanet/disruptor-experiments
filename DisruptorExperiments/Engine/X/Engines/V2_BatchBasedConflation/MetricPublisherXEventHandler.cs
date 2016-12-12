@@ -9,6 +9,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         private readonly LongHistogram _latencyHistogram;
         private readonly IntHistogram _conflactionHistogram;
         private int _updateCount;
+        private int _entryWithUpdateCount;
 
         public MetricPublisherXEventHandler()
         {
@@ -18,13 +19,14 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
-            if (data.EventType != XEventType.MarketData)
+            if (data.ProcessedMarketDataCount == 0)
                 return;
 
             //_latencyHistogram.RecordValue(data.HandlerMetrics[0].BeginTimestamp - data.AcquireTimestamp);
             //_latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.HandlerBeginTimestamps[0]);
-            _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
-            _updateCount += data.MarketDataUpdate.UpdateCount;
+            _conflactionHistogram.RecordValue(data.ProcessedMarketDataCount);
+            _updateCount += data.ProcessedMarketDataCount;
+            _entryWithUpdateCount++;
         }
 
         public void OnStart()
@@ -36,6 +38,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
             //_latencyHistogram.OutputPercentileDistribution(Console.Out, outputValueUnitScalingRatio: OutputScalingFactor.TimeStampToMicroseconds, percentileTicksPerHalfDistance: 1);
             _conflactionHistogram.OutputPercentileDistribution(Console.Out, percentileTicksPerHalfDistance: 1);
             Console.WriteLine($"Reveiced UpdateCount: {_updateCount}");
+            Console.WriteLine($"Reveiced EntryCount: {_entryWithUpdateCount}");
         }
     }
 }

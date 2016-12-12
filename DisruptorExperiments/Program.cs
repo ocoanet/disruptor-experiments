@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using DisruptorExperiments.Engine.X;
-using DisruptorExperiments.Engine.X.Engines.V3_Complete;
-using DisruptorExperiments.Engine.X.Interfaces.V1_MethodPerEventType;
+using DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction;
+using V1Engine = DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction.XEngine;
+using V2Engine = DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation.XEngine;
+using V3Engine = DisruptorExperiments.Engine.X.Engines.V3_Complete.XEngine;
 using DisruptorExperiments.MarketData;
 
 namespace DisruptorExperiments
@@ -14,16 +15,17 @@ namespace DisruptorExperiments
     {
         public static void Main(string[] args)
         {
-            var engine = new XEngine();
+            var engine = new V1Engine();
             engine.Start();
-
-            //var publisher = new MarketDataPublisher1(engine, securityCount: 50);
-            //publisher.Run(TimeSpan.FromSeconds(10));
-            //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
-
-            var publisher = new MarketDataPublisher2(engine, securityCount: 50);
+            var publisher = new MarketDataPublisher1(engine, securityCount: 50);
             publisher.Run(TimeSpan.FromSeconds(10));
             Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
+
+            //var engine = new V2Engine();
+            //engine.Start();
+            //var publisher = new MarketDataPublisher2(engine, securityCount: 50);
+            //publisher.Run(TimeSpan.FromSeconds(10));
+            //Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
             //MeasureEnqueue(engine);
 
@@ -33,7 +35,7 @@ namespace DisruptorExperiments
             Console.ReadKey();
         }
 
-        private static void MeasureEnqueue(XEngine engine)
+        private static void MeasureEnqueue(V3Engine engine)
         {
             var stopwatch = new Stopwatch();
 
@@ -56,7 +58,7 @@ namespace DisruptorExperiments
             }
         }
 
-        private static void PublishTradingSignalV1(IXEngine engine)
+        private static void PublishTradingSignalV1(Engine.X.Interfaces.V1_MethodPerEventType.IXEngine engine)
         {
             for (int i = 0; i < 15000000; i++)
             {
@@ -85,7 +87,7 @@ namespace DisruptorExperiments
             private readonly Dictionary<int, MarketDataConflater> _conflacters;
             private readonly long[] _prices;
 
-            public MarketDataPublisher1(XEngine targetEngine, int securityCount)
+            public MarketDataPublisher1(V1Engine targetEngine, int securityCount)
             {
                 _conflacters = Enumerable.Range(0, securityCount).ToDictionary(x => x, x => new MarketDataConflater(targetEngine, x));
                 _prices = Enumerable.Repeat(500L, securityCount).ToArray();
@@ -120,10 +122,10 @@ namespace DisruptorExperiments
             private readonly Random _random = new Random();
             private readonly Stopwatch _stopwatch = new Stopwatch();
             private readonly MarketDataUpdate _marketDataUpdate = new MarketDataUpdate { UpdateCount = 1 };
-            private readonly XEngine _targetEngine;
+            private readonly V2Engine _targetEngine;
             private readonly long[] _prices;
 
-            public MarketDataPublisher2(XEngine targetEngine, int securityCount)
+            public MarketDataPublisher2(V2Engine targetEngine, int securityCount)
             {
                 _targetEngine = targetEngine;
                 _prices = Enumerable.Repeat(500L, securityCount).ToArray();
@@ -145,7 +147,7 @@ namespace DisruptorExperiments
 
                     using (var acquire = _targetEngine.AcquireEvent())
                     {
-                        acquire.Event.SetMarketDataForBatching(securityId, _marketDataUpdate);
+                        acquire.Event.SetMarketData(securityId, _marketDataUpdate);
                     }
 
                     UpdateCount++;

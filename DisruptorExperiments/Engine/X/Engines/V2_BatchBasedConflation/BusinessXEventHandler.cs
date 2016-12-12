@@ -12,7 +12,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         private readonly Stack<Security> _securityPool = new Stack<Security>(Enumerable.Range(0, 100).Select(x => new Security()));
         private readonly Dictionary<int, Security> _securities = new Dictionary<int, Security>(100);
         private readonly Dictionary<int, Security> _updatedSecurities = new Dictionary<int, Security>(100);
-        private long _marketDataEntryCount = 0;
+        private int _marketDataEntryCount = 0;
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {

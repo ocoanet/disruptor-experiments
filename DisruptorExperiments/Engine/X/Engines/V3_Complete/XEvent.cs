@@ -32,7 +32,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V3_Complete
             MarketDataUpdate.Reset();
         }
 
-        public void SetMarketData(int securityId, IMarketDataConflater marketDataConflater)
+        public void SetMarketData(int securityId, MarketDataConflater marketDataConflater)
         {
             EventType = XEventType.MarketData;
             EventData.MarketData.SecurityId = securityId;
@@ -91,7 +91,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V3_Complete
         public struct MarketDataInfo
         {
             [FieldOffset(0)]
-            public IMarketDataConflater Conflater;
+            public MarketDataConflater Conflater;
 
             [FieldOffset(8)]
             public int SecurityId;

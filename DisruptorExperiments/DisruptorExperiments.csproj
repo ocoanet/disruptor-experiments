@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\X\AcquireScope.cs" />
+    <Compile Include="Engine\X\Engines\V1_SyncBasedConflaction\MarketDataConflater.cs" />
     <Compile Include="Engine\X\Engines\V2_BatchBasedConflation\BusinessXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V1_SyncBasedConflaction\BusinessXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V1_SyncBasedConflaction\CleanerXEventHandler.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Engine\X\Engines\V3_Complete\BusinessXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\CleanerXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\DumperXEventHandler.cs" />
+    <Compile Include="Engine\X\Engines\V3_Complete\MarketDataConflater.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\MetricPublisherXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\StatePublisherXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\XEngine.cs" />
@@ -74,8 +76,6 @@
     <Compile Include="Engine\X\Engines\V1_SyncBasedConflaction\XEngine.cs" />
     <Compile Include="Engine\X\Engines\V1_SyncBasedConflaction\XEvent.cs" />
     <Compile Include="Engine\X\XEventType.cs" />
-    <Compile Include="MarketData\IMarketDataConflater.cs" />
-    <Compile Include="MarketData\MarketDataConflater.cs" />
     <Compile Include="MarketData\MarketDataUpdate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

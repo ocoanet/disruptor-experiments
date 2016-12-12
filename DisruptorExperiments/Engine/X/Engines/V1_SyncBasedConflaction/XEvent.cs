@@ -14,7 +14,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
         public readonly MarketDataUpdate MarketDataUpdate = new MarketDataUpdate();
         public readonly HandlerMetricInfo[] HandlerMetrics;
         public long AcquireTimestamp;
-        public long ProcessedMarketDataCount;
 
         public XEventType EventType;
         public EventInfo EventData;
@@ -26,25 +25,16 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
 
         public void Reset()
         {
-            ProcessedMarketDataCount = 0;
             EventType = XEventType.None;
             EventData = default(EventInfo);
             MarketDataUpdate.Reset();
         }
 
-        public void SetMarketData(int securityId, IMarketDataConflater marketDataConflater)
+        public void SetMarketData(int securityId, MarketDataConflater marketDataConflater)
         {
             EventType = XEventType.MarketData;
             EventData.MarketData.SecurityId = securityId;
             EventData.MarketData.Conflater = marketDataConflater;
-        }
-
-        public void SetMarketDataForBatching(int securityId, MarketDataUpdate update)
-        {
-            EventType = XEventType.MarketData;
-            update.ApplyTo(MarketDataUpdate);
-            EventData.MarketDataForBatching.SecurityId = securityId;
-            EventData.MarketDataForBatching.Update = MarketDataUpdate;
         }
 
         public void SetExecution(int securityId, long price, long quantity)
@@ -78,9 +68,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
             public MarketDataInfo MarketData;
 
             [FieldOffset(0)]
-            public MarketDataForBatchingInfo MarketDataForBatching;
-
-            [FieldOffset(0)]
             public ExecutionInfo Execution;
 
             [FieldOffset(0)]
@@ -91,17 +78,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
         public struct MarketDataInfo
         {
             [FieldOffset(0)]
-            public IMarketDataConflater Conflater;
-
-            [FieldOffset(8)]
-            public int SecurityId;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        public struct MarketDataForBatchingInfo
-        {
-            [FieldOffset(0)]
-            public MarketDataUpdate Update;
+            public MarketDataConflater Conflater;
 
             [FieldOffset(8)]
             public int SecurityId;
