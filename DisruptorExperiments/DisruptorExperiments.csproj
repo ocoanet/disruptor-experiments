@@ -77,6 +77,8 @@
     <Compile Include="Engine\X\Engines\V1_SyncBasedConflaction\XEvent.cs" />
     <Compile Include="Engine\X\XEventType.cs" />
     <Compile Include="MarketData\MarketDataUpdate.cs" />
+    <Compile Include="Misc\IFxRateMap.cs" />
+    <Compile Include="Misc\NumericValue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
