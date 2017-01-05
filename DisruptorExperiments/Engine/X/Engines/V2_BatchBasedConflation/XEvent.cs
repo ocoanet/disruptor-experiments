@@ -14,7 +14,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         public readonly MarketDataUpdate MarketDataUpdate = new MarketDataUpdate();
         public readonly HandlerMetricInfo[] HandlerMetrics;
         public long AcquireTimestamp;
-        public int ProcessedMarketDataCount;
 
         public XEventType EventType;
         public EventInfo EventData;
@@ -26,7 +25,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 
         public void Reset()
         {
-            ProcessedMarketDataCount = 0;
             EventType = XEventType.None;
             EventData = default(EventInfo);
             MarketDataUpdate.Reset();

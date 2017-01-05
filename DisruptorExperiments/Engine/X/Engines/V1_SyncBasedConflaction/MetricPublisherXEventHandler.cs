@@ -9,6 +9,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
         private readonly LongHistogram _latencyHistogram;
         private readonly IntHistogram _conflactionHistogram;
         private int _updateCount;
+        private int _entryWithUpdateCount;
 
         public MetricPublisherXEventHandler()
         {
@@ -25,6 +26,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
             //_latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.HandlerBeginTimestamps[0]);
             _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
             _updateCount += data.MarketDataUpdate.UpdateCount;
+            _entryWithUpdateCount++;
         }
 
         public void OnStart()
@@ -36,6 +38,8 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
             //_latencyHistogram.OutputPercentileDistribution(Console.Out, outputValueUnitScalingRatio: OutputScalingFactor.TimeStampToMicroseconds, percentileTicksPerHalfDistance: 1);
             _conflactionHistogram.OutputPercentileDistribution(Console.Out, percentileTicksPerHalfDistance: 1);
             Console.WriteLine($"Reveiced UpdateCount: {_updateCount}");
+            Console.WriteLine($"Reveiced EntryCount: {_entryWithUpdateCount}");
+
         }
     }
 }

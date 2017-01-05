@@ -3,78 +3,92 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Disruptor;
-using DisruptorExperiments.MarketData;
 
 namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 {
-    public class BatchingBusinessXEventHandler : IEventHandler<XEvent>
+    public class BusinessXEventHandler : IEventHandler<XEvent>
     {
-        private readonly Stack<Security> _securityPool = new Stack<Security>(Enumerable.Range(0, 100).Select(x => new Security()));
-        private readonly Dictionary<int, Security> _securities = new Dictionary<int, Security>(100);
-        private readonly Dictionary<int, Security> _updatedSecurities = new Dictionary<int, Security>(100);
-        private int _marketDataEntryCount = 0;
+        private readonly Stack<MovingAverage> _movingAveragePool = new Stack<MovingAverage>(Enumerable.Range(0, 100).Select(x => new MovingAverage()));
+        private readonly Dictionary<int, MovingAverage> _movingAverages = new Dictionary<int, MovingAverage>();
+        private readonly Batch _batch = new Batch();
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
             data.HandlerMetrics[0].BeginTimestamp = Stopwatch.GetTimestamp();
 
-            if (data.EventType == XEventType.MarketData)
-            {
-                AddToUpdatedSecurities(ref data.EventData.MarketData, data.MarketDataUpdate);
-            }
+            _batch.Add(data);
 
-            if (_updatedSecurities.Count != 0 && (data.EventType != XEventType.MarketData || endOfBatch))
-            {
-                ProcessUpdatedSecurities();
-                data.ProcessedMarketDataCount = _marketDataEntryCount;
-                _marketDataEntryCount = 0;
-            }
+            if (endOfBatch)
+                ProcessBatch();
 
             data.HandlerMetrics[0].EndTimestamp = Stopwatch.GetTimestamp();
         }
 
-        private void AddToUpdatedSecurities(ref XEvent.MarketDataInfo marketData, MarketDataUpdate update)
+        private void ProcessBatch()
         {
-            var security = GetSecurity(marketData.SecurityId);
-            update.ApplyTo(security.MarketData);
-            _updatedSecurities[marketData.SecurityId] = security;
-            _marketDataEntryCount++;
-        }
-
-        private Security GetSecurity(int securityId)
-        {
-            Security security;
-            if (_securities.TryGetValue(securityId, out security))
-                return security;
-
-            security = _securityPool.Count != 0 ? _securityPool.Pop() : new Security();
-            security.SecurityId = securityId;
-
-            _securities.Add(securityId, security);
-
-            return security;
-        }
-
-        private void ProcessUpdatedSecurities()
-        {
-            foreach (var security in _updatedSecurities.Values)
+            for (int entryIndex = 0; entryIndex < _batch.Entries.Count; entryIndex++)
             {
-                Thread.SpinWait(1 << 5);
+                var entry = _batch.Entries[entryIndex];
 
-                if (security.MarketData.Last == null)
-                    return;
+                if (entry.EventType == XEventType.MarketData)
+                {
+                    ProcessMarketDataUpdate(ref entry.EventData.MarketData);
+                }
+            }
+            _batch.Clear();
+        }
 
-                security.MovingAverage.Add(security.MarketData.Last.Value);
+        private void ProcessMarketDataUpdate(ref XEvent.MarketDataInfo marketData)
+        {
+            var marketDataUpdate = marketData.Update;
+
+            Thread.SpinWait(1 << 5);
+
+            if (marketDataUpdate.Last == null)
+                return;
+
+            var movingAverage = GetMovingAverage(marketData.SecurityId);
+            movingAverage.Add(marketDataUpdate.Last.Value);
+        }
+
+        private MovingAverage GetMovingAverage(int securityId)
+        {
+            MovingAverage movingAverage;
+            if (_movingAverages.TryGetValue(securityId, out movingAverage))
+                return movingAverage;
+
+            movingAverage = _movingAveragePool.Count != 0 ? _movingAveragePool.Pop() : new MovingAverage();
+            _movingAverages.Add(securityId, movingAverage);
+
+            return movingAverage;
+        }
+
+        private class Batch
+        {
+            private readonly Dictionary<int, XEvent> _marketDataEntries = new Dictionary<int, XEvent>();
+            public readonly List<XEvent> Entries = new List<XEvent>();
+
+            public void Add(XEvent data)
+            {
+                if (data.EventType == XEventType.MarketData)
+                {
+                    XEvent previousMarketDataEvent;
+                    if (_marketDataEntries.TryGetValue(data.EventData.MarketData.SecurityId, out previousMarketDataEvent))
+                    {
+                        data.MarketDataUpdate.ApplyTo(previousMarketDataEvent.MarketDataUpdate);
+                        data.EventType = XEventType.None;
+                        return;
+                    }
+                    _marketDataEntries.Add(data.EventData.MarketData.SecurityId, data);
+                }
+                Entries.Add(data);
             }
 
-            _updatedSecurities.Clear();
-        }
-
-        private class Security
-        {
-            public int SecurityId { get; set; }
-            public MarketDataUpdate MarketData { get; } = new MarketDataUpdate();
-            public MovingAverage MovingAverage { get; } = new MovingAverage();
+            public void Clear()
+            {
+                _marketDataEntries.Clear();
+                Entries.Clear();
+            }
         }
 
         private class MovingAverage

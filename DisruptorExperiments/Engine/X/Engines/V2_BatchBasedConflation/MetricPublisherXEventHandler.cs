@@ -19,13 +19,13 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
-            if (data.ProcessedMarketDataCount == 0)
+            if (data.EventType != XEventType.MarketData)
                 return;
 
             //_latencyHistogram.RecordValue(data.HandlerMetrics[0].BeginTimestamp - data.AcquireTimestamp);
             //_latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.HandlerBeginTimestamps[0]);
-            _conflactionHistogram.RecordValue(data.ProcessedMarketDataCount);
-            _updateCount += data.ProcessedMarketDataCount;
+            _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
+            _updateCount += data.MarketDataUpdate.UpdateCount;
             _entryWithUpdateCount++;
         }
 

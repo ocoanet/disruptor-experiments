@@ -12,7 +12,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         public XEngine()
         {
             _disrutpor = new Disruptor<XEvent>(() => new XEvent(1), 32768, TaskScheduler.Default);
-            _disrutpor.HandleEventsWith(new BatchingBusinessXEventHandler())
+            _disrutpor.HandleEventsWith(new BusinessXEventHandler())
                 .Then(new MetricPublisherXEventHandler())
                 .Then(new CleanerXEventHandler())
                 ;
