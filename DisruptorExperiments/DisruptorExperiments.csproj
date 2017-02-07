@@ -81,6 +81,9 @@
     <Compile Include="Misc\NumericValue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="V1EngineScenarios.cs" />
+    <Compile Include="V2EngineScenarios.cs" />
+    <Compile Include="V3EngineScenarios.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
