@@ -67,6 +67,12 @@
     <Compile Include="Engine\X\Engines\V3_Complete\StatePublisherXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\XEngine.cs" />
     <Compile Include="Engine\X\Engines\V3_Complete\XEvent.cs" />
+    <Compile Include="Engine\X\Engines\V4_DynamicSize\Business2XEventHandler.cs" />
+    <Compile Include="Engine\X\Engines\V4_DynamicSize\Business1XEventHandler.cs" />
+    <Compile Include="Engine\X\Engines\V4_DynamicSize\CleanerXEventHandler.cs" />
+    <Compile Include="Engine\X\Engines\V4_DynamicSize\MetricPublisherXEventHandler.cs" />
+    <Compile Include="Engine\X\Engines\V4_DynamicSize\XEngine.cs" />
+    <Compile Include="Engine\X\Engines\V4_DynamicSize\XEvent.cs" />
     <Compile Include="Engine\X\Events\V3_Unions\XEvent.cs" />
     <Compile Include="Engine\X\Events\V2_PooledObjects\XEvent.cs" />
     <Compile Include="Engine\X\Events\V1_PropertyMess\XEvent.cs" />
@@ -84,6 +90,7 @@
     <Compile Include="V1EngineScenarios.cs" />
     <Compile Include="V2EngineScenarios.cs" />
     <Compile Include="V3EngineScenarios.cs" />
+    <Compile Include="V4EngineScenarios.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
