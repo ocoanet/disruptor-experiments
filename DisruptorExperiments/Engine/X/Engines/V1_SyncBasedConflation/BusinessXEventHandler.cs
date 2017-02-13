@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Disruptor;
 
-namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
+namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 {
     public class BusinessXEventHandler : IEventHandler<XEvent>
     {

@@ -6,7 +6,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V4_DynamicSize
     {
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
-            for (var index = data.BeginOffset; index < data.EndOffset; index++)
+            for (var index = data.BeginOffset; index <= data.EndOffset; index++)
             {
                 data.Data[index] = 0;
             }

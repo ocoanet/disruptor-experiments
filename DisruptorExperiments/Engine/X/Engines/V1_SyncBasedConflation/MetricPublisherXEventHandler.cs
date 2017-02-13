@@ -2,7 +2,7 @@
 using Disruptor;
 using HdrHistogram;
 
-namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
+namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 {
     public class MetricPublisherXEventHandler : IEventHandler<XEvent>, ILifecycleAware
     {

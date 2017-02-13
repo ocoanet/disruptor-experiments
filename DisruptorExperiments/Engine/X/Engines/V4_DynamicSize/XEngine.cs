@@ -1,22 +1,25 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Disruptor;
 using Disruptor.Dsl;
+using DisruptorExperiments.Misc;
 
 namespace DisruptorExperiments.Engine.X.Engines.V4_DynamicSize
 {
-    public class XEngine
+    public class XEngine : IDisposable
     {
+        private readonly TaskScheduler _taskScheduler = new ExperimentalTaskScheduler(4, 1, 3, 5, 7);
         private readonly Disruptor<XEvent> _disrutpor;
         private readonly RingBuffer<XEvent> _ringBuffer;
 
         public XEngine(int entrySize)
         {
-            _disrutpor = new Disruptor<XEvent>(() => new XEvent(entrySize), 32768, TaskScheduler.Default);
-            _disrutpor.HandleEventsWith(new Business1XEventHandler())
-                .Then(new Business2XEventHandler())
-                .Then(new MetricPublisherXEventHandler(entrySize))
-                .Then(new CleanerXEventHandler())
-                ;
+            // 16384, 32768, 65536
+            _disrutpor = new Disruptor<XEvent>(() => new XEvent(entrySize), 32768, _taskScheduler, ProducerType.Single, new BusySpinWaitStrategy());
+            _disrutpor.HandleEventsWith(new BusinessXEventHandler())
+                      .Then(new BusinessXEventHandler())
+                      .Then(new MetricPublisherXEventHandler(entrySize))
+                      .Then(new CleanerXEventHandler());
 
             _ringBuffer = _disrutpor.RingBuffer;
         }
@@ -37,6 +40,11 @@ namespace DisruptorExperiments.Engine.X.Engines.V4_DynamicSize
         public void Stop()
         {
             _disrutpor.Shutdown();
+        }
+
+        public void Dispose()
+        {
+            (_taskScheduler as IDisposable)?.Dispose();
         }
     }
 }

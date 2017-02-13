@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using DisruptorExperiments.MarketData;
 
-namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
+namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 {
     /// <summary>
     /// Locked-based.

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Disruptor;
 using Disruptor.Dsl;
 
-namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
+namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 {
     public class XEngine
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction;
+using DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation;
 using DisruptorExperiments.MarketData;
 
 namespace DisruptorExperiments

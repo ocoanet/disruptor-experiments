@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using DisruptorExperiments.MarketData;
 
-namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflaction
+namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 {
     public class XEvent
     {

@@ -4,14 +4,12 @@ namespace DisruptorExperiments
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
-            V4EngineScenarios.MeasureLatency(1);
+            V4EngineScenarios.MeasureLatencyForMultipleSizes();
 
             Console.WriteLine("...");
             Console.ReadKey();
         }
-
-        
     }
 }
