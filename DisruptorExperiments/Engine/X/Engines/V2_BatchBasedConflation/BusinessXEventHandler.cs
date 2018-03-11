@@ -11,7 +11,8 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
     {
         private readonly Stack<MovingAverage> _movingAveragePool = new Stack<MovingAverage>(Enumerable.Range(0, 100).Select(x => new MovingAverage()));
         private readonly Dictionary<int, MovingAverage> _movingAverages = new Dictionary<int, MovingAverage>();
-        private readonly Batch _batch = new Batch();
+        private readonly Dictionary<int, XEvent> _marketDataEvents = new Dictionary<int, XEvent>();
+        public readonly List<XEvent> _batchEvents = new List<XEvent>();
 
         public void OnEvent(XEvent data, long sequence, bool endOfBatch)
         {
@@ -27,21 +28,33 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 
         private void AddToBatch(XEvent data)
         {
-            _batch.Add(data);
+            if (data.EventType == XEventType.MarketData)
+            {
+                ref var marketData = ref data.EventData.MarketData;
+                if (_marketDataEvents.TryGetValue(marketData.SecurityId, out var previousEvent))
+                {
+                    marketData.ApplyTo(ref previousEvent.EventData.MarketData);
+                    data.EventType = XEventType.None;
+                    return;
+                }
+                _marketDataEvents.Add(marketData.SecurityId, data);
+            }
+            _batchEvents.Add(data);
         }
 
         private void ProcessBatch()
         {
-            for (int entryIndex = 0; entryIndex < _batch.Events.Count; entryIndex++)
+            for (int entryIndex = 0; entryIndex < _batchEvents.Count; entryIndex++)
             {
-                var entry = _batch.Events[entryIndex];
+                var entry = _batchEvents[entryIndex];
 
                 if (entry.EventType == XEventType.MarketData)
                 {
                     ProcessMarketDataUpdate(ref entry.EventData.MarketData);
                 }
             }
-            _batch.Clear();
+            _marketDataEvents.Clear();
+            _batchEvents.Clear();
         }
 
         private void ProcessMarketDataUpdate(ref XEvent.MarketDataInfo marketData)
@@ -65,34 +78,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
             _movingAverages.Add(securityId, movingAverage);
 
             return movingAverage;
-        }
-
-        private class Batch
-        {
-            private readonly Dictionary<int, XEvent> _marketDataEvents = new Dictionary<int, XEvent>();
-            public readonly List<XEvent> Events = new List<XEvent>();
-
-            public void Add(XEvent data)
-            {
-                if (data.EventType == XEventType.MarketData)
-                {
-                    XEvent previousEvent;
-                    if (_marketDataEvents.TryGetValue(data.EventData.MarketData.SecurityId, out previousEvent))
-                    {
-                        data.EventData.MarketData.ApplyTo(ref previousEvent.EventData.MarketData);
-                        data.EventType = XEventType.None;
-                        return;
-                    }
-                    _marketDataEvents.Add(data.EventData.MarketData.SecurityId, data);
-                }
-                Events.Add(data);
-            }
-
-            public void Clear()
-            {
-                _marketDataEvents.Clear();
-                Events.Clear();
-            }
         }
 
         private class MovingAverage

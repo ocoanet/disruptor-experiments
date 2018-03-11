@@ -13,12 +13,14 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
     {
         private SpinLock _spinLock = new SpinLock();
         private readonly XEngine _engine;
+        //private readonly RingBuffer<XEvent> _ringBuffer;
         private readonly int _securityId;
         private XEvent _currentEvent;
 
         public MarketDataConflater(XEngine engine, int securityId)
         {
             _engine = engine;
+            //_ringBuffer = engine.RingBuffer;
             _securityId = securityId;
         }
 
@@ -30,13 +32,9 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
                 _spinLock.Enter(ref lockTaken);
 
                 if (_currentEvent == null)
-                {
                     Add(update);
-                }
                 else
-                {
                     Merge(update);
-                }
             }
             finally
             {
@@ -55,6 +53,17 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
             }
         }
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private void Add(MarketDataUpdate update)
+        //{
+        //    var sequence = _ringBuffer.Next();
+
+        //    _currentEvent = _ringBuffer[sequence];
+        //    _currentEvent.SetMarketData(_securityId, this, update);
+
+        //    _ringBuffer.Publish(sequence);
+        //}
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Merge(MarketDataUpdate update)
         {
@@ -63,7 +72,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 
         public void Detach()
         {
-            var currentEvent = _currentEvent;
             var lockTaken = false;
             try
             {
