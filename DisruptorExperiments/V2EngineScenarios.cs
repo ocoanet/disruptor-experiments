@@ -15,7 +15,7 @@ namespace DisruptorExperiments
             engine.Start();
 
             var publisher = new MarketDataPublisher2(engine, securityCount: 50);
-            publisher.Run(TimeSpan.FromSeconds(10));
+            publisher.Run(1_000_000);
             Console.WriteLine($"Generated UpdateCount: {publisher.UpdateCount}");
 
             engine.Stop();
@@ -37,12 +37,13 @@ namespace DisruptorExperiments
 
             public int UpdateCount { get; private set; }
 
-            public void Run(TimeSpan duration)
+            public void Run(int entryCount)
             {
                 var collectionCountBefore = GC.CollectionCount(0);
 
                 _stopwatch.Restart();
-                while (_stopwatch.Elapsed < duration)
+
+                for (int i = 0; i < entryCount; i++)
                 {
                     var securityId = _random.Next(_prices.Length);
                     _prices[securityId] += 5 - _random.Next(10);
@@ -57,6 +58,9 @@ namespace DisruptorExperiments
                     UpdateCount++;
                     Thread.SpinWait(1 + _random.Next(1 << 5));
                 }
+
+                _stopwatch.Stop();
+                Console.WriteLine($"Elapsed: {_stopwatch.Elapsed}");
 
                 var collectionCount = GC.CollectionCount(0) - collectionCountBefore;
                 Console.WriteLine($"CollectionCount: {collectionCount}");

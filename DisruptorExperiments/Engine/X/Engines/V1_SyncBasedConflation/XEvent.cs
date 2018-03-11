@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using DisruptorExperiments.MarketData;
 
@@ -11,7 +12,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
             HandlerMetrics = new HandlerMetricInfo[eventHandlerCount];
         }
 
-        public readonly MarketDataUpdate MarketDataUpdate = new MarketDataUpdate();
         public readonly HandlerMetricInfo[] HandlerMetrics;
         public long AcquireTimestamp;
 
@@ -27,14 +27,17 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
         {
             EventType = XEventType.None;
             EventData = default(EventInfo);
-            MarketDataUpdate.Reset();
         }
 
-        public void SetMarketData(int securityId, MarketDataConflater marketDataConflater)
+        public void SetMarketData(int securityId, MarketDataConflater marketDataConflater, MarketDataUpdate update)
         {
             EventType = XEventType.MarketData;
-            EventData.MarketData.SecurityId = securityId;
             EventData.MarketData.Conflater = marketDataConflater;
+            EventData.MarketData.SecurityId = securityId;
+            EventData.MarketData.BidOrZero = update.Bid.GetValueOrDefault();
+            EventData.MarketData.AskOrZero = update.Ask.GetValueOrDefault();
+            EventData.MarketData.LastOrZero = update.Last.GetValueOrDefault();
+            EventData.MarketData.UpdateCount = update.UpdateCount;
         }
 
         public void SetExecution(int securityId, long price, long quantity)
@@ -79,9 +82,30 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
         {
             [FieldOffset(0)]
             public MarketDataConflater Conflater;
-
             [FieldOffset(8)]
             public int SecurityId;
+            [FieldOffset(12)]
+            public long BidOrZero;
+            [FieldOffset(20)]
+            public long AskOrZero;
+            [FieldOffset(28)]
+            public long LastOrZero;
+            [FieldOffset(36)]
+            public int UpdateCount;
+
+            internal void MergeWith(MarketDataUpdate update)
+            {
+                if (update.Bid != null)
+                    BidOrZero = update.Bid.GetValueOrDefault();
+
+                if (update.Ask != null)
+                    AskOrZero = update.Ask.GetValueOrDefault();
+
+                if (update.Last != null)
+                    LastOrZero = update.Last.GetValueOrDefault();
+
+                UpdateCount += update.UpdateCount;
+            }
         }
 
         [StructLayout(LayoutKind.Explicit)]

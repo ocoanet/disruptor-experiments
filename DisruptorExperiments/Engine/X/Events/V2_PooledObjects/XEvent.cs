@@ -5,6 +5,12 @@
         public XEventType EventType { get; private set; }
         public object EventData { get; private set; }
 
+        public MarketDataInfo MarketData
+            => (MarketDataInfo)EventData;
+
+        public ExecutionInfo Execution
+            => (ExecutionInfo)EventData;
+
         public void SetMarketData(MarketDataInfo marketData)
         {
             EventType = XEventType.MarketData;

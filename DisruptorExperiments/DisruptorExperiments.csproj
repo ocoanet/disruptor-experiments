@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DisruptorExperiments</RootNamespace>
     <AssemblyName>DisruptorExperiments</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -33,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Disruptor, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
@@ -74,6 +75,8 @@
     <Compile Include="Engine\X\Engines\V4_DynamicSize\MetricPublisherXEventHandler.cs" />
     <Compile Include="Engine\X\Engines\V4_DynamicSize\XEngine.cs" />
     <Compile Include="Engine\X\Engines\V4_DynamicSize\XEvent.cs" />
+    <Compile Include="Engine\X\Events\V1_PropertyMess\XEventHandler.cs" />
+    <Compile Include="Engine\X\Events\V2_PooledObjects\XEventHandler.cs" />
     <Compile Include="Engine\X\Events\V3_Unions\XEvent.cs" />
     <Compile Include="Engine\X\Events\V2_PooledObjects\XEvent.cs" />
     <Compile Include="Engine\X\Events\V1_PropertyMess\XEvent.cs" />

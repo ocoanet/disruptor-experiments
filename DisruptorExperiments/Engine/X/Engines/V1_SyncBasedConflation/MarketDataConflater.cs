@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using Disruptor;
 using DisruptorExperiments.MarketData;
 
 namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
@@ -9,13 +12,13 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
     public class MarketDataConflater
     {
         private SpinLock _spinLock = new SpinLock();
-        private readonly XEngine _targetEngine;
+        private readonly XEngine _engine;
         private readonly int _securityId;
         private XEvent _currentEvent;
 
-        public MarketDataConflater(XEngine targetEngine, int securityId)
+        public MarketDataConflater(XEngine engine, int securityId)
         {
-            _targetEngine = targetEngine;
+            _engine = engine;
             _securityId = securityId;
         }
 
@@ -28,13 +31,12 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 
                 if (_currentEvent == null)
                 {
-                    using (var acquire = _targetEngine.AcquireEvent())
-                    {
-                        _currentEvent = acquire.Event;
-                        _currentEvent.SetMarketData(_securityId, this);
-                    }
+                    Add(update);
                 }
-                update.ApplyTo(_currentEvent.MarketDataUpdate);
+                else
+                {
+                    Merge(update);
+                }
             }
             finally
             {
@@ -43,7 +45,23 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
             }
         }
 
-        public MarketDataUpdate Detach()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Add(MarketDataUpdate update)
+        {
+            using (var acquire = _engine.AcquireEvent())
+            {
+                _currentEvent = acquire.Event;
+                _currentEvent.SetMarketData(_securityId, this, update);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Merge(MarketDataUpdate update)
+        {
+            _currentEvent.EventData.MarketData.MergeWith(update);
+        }
+
+        public void Detach()
         {
             var currentEvent = _currentEvent;
             var lockTaken = false;
@@ -58,7 +76,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
                 if (lockTaken)
                     _spinLock.Exit();
             }
-            return currentEvent.MarketDataUpdate;
         }
     }
 }

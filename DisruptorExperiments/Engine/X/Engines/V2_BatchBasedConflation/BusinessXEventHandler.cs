@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         {
             data.HandlerMetrics[0].BeginTimestamp = Stopwatch.GetTimestamp();
 
-            _batch.Add(data);
+            AddToBatch(data);
 
             if (endOfBatch)
                 ProcessBatch();
@@ -24,11 +25,16 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
             data.HandlerMetrics[0].EndTimestamp = Stopwatch.GetTimestamp();
         }
 
+        private void AddToBatch(XEvent data)
+        {
+            _batch.Add(data);
+        }
+
         private void ProcessBatch()
         {
-            for (int entryIndex = 0; entryIndex < _batch.Entries.Count; entryIndex++)
+            for (int entryIndex = 0; entryIndex < _batch.Events.Count; entryIndex++)
             {
-                var entry = _batch.Entries[entryIndex];
+                var entry = _batch.Events[entryIndex];
 
                 if (entry.EventType == XEventType.MarketData)
                 {
@@ -40,15 +46,13 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 
         private void ProcessMarketDataUpdate(ref XEvent.MarketDataInfo marketData)
         {
-            var marketDataUpdate = marketData.Update;
-
             Thread.SpinWait(1 << 5);
 
-            if (marketDataUpdate.Last == null)
+            if (marketData.LastOrZero == 0)
                 return;
 
             var movingAverage = GetMovingAverage(marketData.SecurityId);
-            movingAverage.Add(marketDataUpdate.Last.Value);
+            movingAverage.Add(marketData.LastOrZero);
         }
 
         private MovingAverage GetMovingAverage(int securityId)
@@ -65,29 +69,29 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
 
         private class Batch
         {
-            private readonly Dictionary<int, XEvent> _marketDataEntries = new Dictionary<int, XEvent>();
-            public readonly List<XEvent> Entries = new List<XEvent>();
+            private readonly Dictionary<int, XEvent> _marketDataEvents = new Dictionary<int, XEvent>();
+            public readonly List<XEvent> Events = new List<XEvent>();
 
             public void Add(XEvent data)
             {
                 if (data.EventType == XEventType.MarketData)
                 {
-                    XEvent previousMarketDataEvent;
-                    if (_marketDataEntries.TryGetValue(data.EventData.MarketData.SecurityId, out previousMarketDataEvent))
+                    XEvent previousEvent;
+                    if (_marketDataEvents.TryGetValue(data.EventData.MarketData.SecurityId, out previousEvent))
                     {
-                        data.MarketDataUpdate.ApplyTo(previousMarketDataEvent.MarketDataUpdate);
+                        data.EventData.MarketData.ApplyTo(ref previousEvent.EventData.MarketData);
                         data.EventType = XEventType.None;
                         return;
                     }
-                    _marketDataEntries.Add(data.EventData.MarketData.SecurityId, data);
+                    _marketDataEvents.Add(data.EventData.MarketData.SecurityId, data);
                 }
-                Entries.Add(data);
+                Events.Add(data);
             }
 
             public void Clear()
             {
-                _marketDataEntries.Clear();
-                Entries.Clear();
+                _marketDataEvents.Clear();
+                Events.Clear();
             }
         }
 

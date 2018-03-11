@@ -3,27 +3,42 @@
     public class XEvent
     {
         public XEventType EventType;
-        public int MarketDataSecurityId;
-        public long MarketDataBidPrice;
-        public long MarketDataAskPrice;
-        public int ExecutionSecurityId;
-        public long ExecutionPrice;
-        public long ExecutionQuantity;
+        public MarketDataInfo MarketData;
+        public ExecutionInfo Execution;
+        public TradingSignal1Info TradingSignal1;
+
+        public struct MarketDataInfo
+        {
+            public int SecurityId;
+            public long BidPrice;
+            public long AskPrice;
+        }
+
+        public struct ExecutionInfo
+        {
+            public int SecurityId;
+            public long Price;
+            public long Quantity;
+        }
+
+        public struct TradingSignal1Info
+        {
+        }
 
         public void SetMarketData(int securityId, long bidPrice, long askPrice)
         {
             EventType = XEventType.MarketData;
-            MarketDataSecurityId = securityId;
-            MarketDataBidPrice = bidPrice;
-            MarketDataAskPrice = askPrice;
+            MarketData.SecurityId = securityId;
+            MarketData.BidPrice = bidPrice;
+            MarketData.AskPrice = askPrice;
         }
 
         public void SetExecution(int securityId, long price, long quantity)
         {
             EventType = XEventType.Execution;
-            ExecutionSecurityId = securityId;
-            ExecutionPrice = price;
-            ExecutionQuantity = quantity;
+            Execution.SecurityId = securityId;
+            Execution.Price = price;
+            Execution.Quantity = quantity;
         }
     }
 }

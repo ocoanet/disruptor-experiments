@@ -24,8 +24,8 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 
             //_latencyHistogram.RecordValue(data.HandlerMetrics[0].BeginTimestamp - data.AcquireTimestamp);
             //_latencyHistogram.RecordValue(data.HandlerEndTimestamps[0] - data.HandlerBeginTimestamps[0]);
-            _conflactionHistogram.RecordValue(data.MarketDataUpdate.UpdateCount);
-            _updateCount += data.MarketDataUpdate.UpdateCount;
+            _conflactionHistogram.RecordValue(data.EventData.MarketData.UpdateCount);
+            _updateCount += data.EventData.MarketData.UpdateCount;
             _entryWithUpdateCount++;
         }
 

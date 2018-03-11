@@ -37,10 +37,15 @@ namespace DisruptorExperiments.Engine.X.Events.V3_Unions
         public struct ExecutionInfo
         {
             [FieldOffset(0)]
+            public string ExecutionCode;
+
+            [FieldOffset(8)]
             public int SecurityId;
-            [FieldOffset(4)]
-            public long Price;
+
             [FieldOffset(12)]
+            public long Price;
+
+            [FieldOffset(20)]
             public long Quantity;
         }
 
@@ -48,10 +53,15 @@ namespace DisruptorExperiments.Engine.X.Events.V3_Unions
         public struct MarketDataInfo
         {
             [FieldOffset(0)]
+            private object _padding0;
+
+            [FieldOffset(8)]
             public int SecurityId;
-            [FieldOffset(4)]
-            public long BidPrice;
+
             [FieldOffset(12)]
+            public long BidPrice;
+
+            [FieldOffset(20)]
             public long AskPrice;
         }
     }

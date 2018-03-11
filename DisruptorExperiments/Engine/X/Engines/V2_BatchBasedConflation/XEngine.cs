@@ -20,6 +20,8 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
             _ringBuffer = _disrutpor.RingBuffer;
         }
 
+        public RingBuffer<XEvent> RingBuffer => _ringBuffer;
+
         public AcquireScope<XEvent> AcquireEvent()
         {
             var sequence = _ringBuffer.Next();

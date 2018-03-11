@@ -11,7 +11,6 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
             HandlerMetrics = new HandlerMetricInfo[eventHandlerCount];
         }
 
-        public readonly MarketDataUpdate MarketDataUpdate = new MarketDataUpdate();
         public readonly HandlerMetricInfo[] HandlerMetrics;
         public long AcquireTimestamp;
 
@@ -27,15 +26,16 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         {
             EventType = XEventType.None;
             EventData = default(EventInfo);
-            MarketDataUpdate.Reset();
         }
 
         public void SetMarketData(int securityId, MarketDataUpdate update)
         {
             EventType = XEventType.MarketData;
-            update.ApplyTo(MarketDataUpdate);
             EventData.MarketData.SecurityId = securityId;
-            EventData.MarketData.Update = MarketDataUpdate;
+            EventData.MarketData.BidOrZero = update.Bid.GetValueOrDefault();
+            EventData.MarketData.AskOrZero = update.Ask.GetValueOrDefault();
+            EventData.MarketData.LastOrZero = update.Last.GetValueOrDefault();
+            EventData.MarketData.UpdateCount = update.UpdateCount;
         }
 
         public void SetExecution(int securityId, long price, long quantity)
@@ -79,22 +79,39 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         public struct MarketDataInfo
         {
             [FieldOffset(0)]
-            public MarketDataUpdate Update;
-
-            [FieldOffset(8)]
             public int SecurityId;
+            [FieldOffset(4)]
+            public long BidOrZero;
+            [FieldOffset(12)]
+            public long AskOrZero;
+            [FieldOffset(20)]
+            public long LastOrZero;
+            [FieldOffset(28)]
+            public int UpdateCount;
+
+            public void ApplyTo(ref MarketDataInfo other)
+            {
+                if (BidOrZero != 0)
+                    other.BidOrZero = BidOrZero;
+
+                if (AskOrZero != 0)
+                    other.AskOrZero = AskOrZero;
+
+                if (LastOrZero != 0)
+                    other.LastOrZero = LastOrZero;
+
+                other.UpdateCount += UpdateCount;
+            }
         }
 
         [StructLayout(LayoutKind.Explicit)]
         public struct ExecutionInfo
         {
             [FieldOffset(0)]
-            private object _ref;
-            [FieldOffset(8)]
             public int SecurityId;
-            [FieldOffset(12)]
+            [FieldOffset(4)]
             public long Price;
-            [FieldOffset(20)]
+            [FieldOffset(12)]
             public long Quantity;
         }
 
@@ -102,18 +119,16 @@ namespace DisruptorExperiments.Engine.X.Engines.V2_BatchBasedConflation
         public struct TradingSignal1Info
         {
             [FieldOffset(0)]
-            private object _ref;
-            [FieldOffset(8)]
             public int SecurityId;
-            [FieldOffset(12)]
+            [FieldOffset(4)]
             public long Value1;
-            [FieldOffset(20)]
+            [FieldOffset(12)]
             public long Value2;
-            [FieldOffset(28)]
+            [FieldOffset(20)]
             public long Value3;
-            [FieldOffset(36)]
+            [FieldOffset(28)]
             public long Value4;
         }
-        
+
     }
 }

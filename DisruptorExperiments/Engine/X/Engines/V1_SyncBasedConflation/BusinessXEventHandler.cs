@@ -25,15 +25,15 @@ namespace DisruptorExperiments.Engine.X.Engines.V1_SyncBasedConflation
 
         private void ProcessMarketDataUpdate(ref XEvent.MarketDataInfo marketData)
         {
-            var marketDataUpdate = marketData.Conflater.Detach();
+            marketData.Conflater.Detach();
 
             Thread.SpinWait(1 << 5);
 
-            if (marketDataUpdate.Last == null)
+            if (marketData.LastOrZero == 0)
                 return;
 
             var movingAverage = GetMovingAverage(marketData.SecurityId);
-            movingAverage.Add(marketDataUpdate.Last.Value);
+            movingAverage.Add(marketData.LastOrZero);
         }
 
         private MovingAverage GetMovingAverage(int securityId)
